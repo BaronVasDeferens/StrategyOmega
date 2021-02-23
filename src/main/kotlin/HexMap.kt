@@ -25,6 +25,7 @@ data class HexMap(
     private var hexSize: Int = 50
 ) {
 
+    // Cached image: the last render of the map. Only updates when a change to the map occurs
     val cachedImage = MutableStateFlow<BufferedImage>(BufferedImage(width,height, BufferedImage.TYPE_INT_RGB))
 
     private val hexArray: Array<Array<Hex>> = Array(rows) { rowNum ->
@@ -123,11 +124,11 @@ data class HexMap(
         return entityToHexMap.entries.firstOrNull { it.value == hex }?.key
     }
 
-    fun getHexAtRowCol(row: Int, column: Int): Hex? {
+    private fun getHexAtRowCol(row: Int, column: Int): Hex? {
         return hexArray[row][column]
     }
 
-    fun findAdjacentHexesTo(center: Hex): Set<Hex> {
+    private fun findAdjacentHexesTo(center: Hex): Set<Hex> {
         val adjacentHexes = mutableSetOf<Hex>()
 
         hexArray.flatten().forEach { hex ->
@@ -196,15 +197,10 @@ data class HexMap(
 
 
         getEntities()
-//            .map { it.getRenderItem() }
-//            .filter { it.layerOrder < 0 }
-//            .sortedBy { it.layerOrder }
             .filterIsInstance<Sprite>()
             .forEach { sprite ->
-
                 val hex = getHexForEntity(sprite)!!
                 val centeredCoordinates = findCenteredCoordinates(hex, sprite)
-
                 g.drawImage(sprite.image, centeredCoordinates.first, centeredCoordinates.second, null)
             }
 
@@ -219,6 +215,10 @@ data class HexMap(
         cachedImage.value = image
     }
 
+    /**
+     * Given a hex and an image, returns the points (x,y) where an image, when drawn at x,y, will be centered within the hex
+     * TODO: check whether image "fits" inside
+     */
     private fun findCenteredCoordinates(hex: Hex, entity: Sprite): Pair<Int, Int> {
         val centerX = hex.poly!!.xpoints[0] + hexSize / 2 - entity.image.width / 2
         val heightOfHexHalf = (0.8660 * hexSize).toInt()
@@ -227,17 +227,8 @@ data class HexMap(
         return Pair(centerX, centerY)
     }
 
-    fun getEntities(): List<Entity> {
+    private fun getEntities(): List<Entity> {
         return entityToHexMap.keys.toList().plus(looseEntities)
     }
-
-}
-
-class BiMap<K,V> {
-
-    private val kToV = mutableMapOf<K,V>()
-    private val vToK = mutableMapOf<V,K>()
-
-
 
 }

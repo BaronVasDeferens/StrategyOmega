@@ -2,18 +2,16 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     MainBrain()
 }
 
+@ExperimentalCoroutinesApi
 @FlowPreview
 class MainBrain {
 
@@ -26,10 +24,7 @@ class MainBrain {
 
     private val hexMap = HexMap(width, height, 5, 5, 100)
 
-    private val entities = mutableListOf<Entity>()
-    private val sprites = mutableListOf<Sprite>()
-
-    val gameFrame = GameFrame("Let's try and animations! 2021", width, height, imageState)
+    private val gameFrame = GameFrame("Let's try strategy and animations! 2021!", width, height, imageState)
 
 
     init {
@@ -66,11 +61,6 @@ class MainBrain {
 
         while (true) {
 
-            // TODO: process input
-
-
-
-
             if (!isPaused.get()) {
                 update()
                 render()
@@ -81,40 +71,10 @@ class MainBrain {
     }
 
     private fun update() {
-//        entities.forEach { entity ->
-//            entity.update()
-//        }
-//
-//        sprites.forEach { sprite ->
-//            sprite.update()
-//        }
-//
-//        playerSprite.update()
+
     }
 
-    @ExperimentalCoroutinesApi
     private fun render() {
-        // val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
-        val image = hexMap.cachedImage.value
-        //val g = image.graphics as Graphics2D
-//        g.color = Color.BLACK
-//        g.fillRect(0, 0, width, height)
-
-
-//        entities.forEach { entity ->
-//            g.color = entity.color
-//            g.drawRect(entity.x, entity.y, 5, 5)
-//        }
-
-//        sprites.forEach { sprite ->
-//            sprite.render(g)
-//        }
-//
-//        playerSprite.render(g)
-
-        //g.dispose()
-
-        // imageState.value = image
-        gameFrame.drawImage(image)
+        gameFrame.drawImage(hexMap.cachedImage.value)
     }
 }
