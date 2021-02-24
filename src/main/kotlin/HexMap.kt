@@ -45,6 +45,14 @@ data class HexMap(
         return entityToHexMap[entity]
     }
 
+    fun getEntityForHex(hex: Hex?): Entity? {
+        return if (hex == null) {
+            null
+        } else {
+            entityToHexMap.entries.firstOrNull { it.value == hex }?.key
+        }
+    }
+
     fun assignEntityToHex(entity: Entity, row: Int, col: Int) {
         assignEntityToHex(entity, hexArray[row][col])
     }
@@ -187,7 +195,6 @@ data class HexMap(
         return adjacentSet
     }
 
-
     private fun renderHexMap() {
 
         val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
@@ -207,10 +214,10 @@ data class HexMap(
         getEntities()
             .filterIsInstance<Sprite>()
             .forEach { sprite ->
-            val hex = getHexForEntity(sprite)!!
-            val centeredCoordinates = findCenteredCoordinates(hex, sprite)
-            g.drawImage(sprite.image, centeredCoordinates.first, centeredCoordinates.second, null)
-        }
+                val hex = getHexForEntity(sprite)!!
+                val centeredCoordinates = findCenteredCoordinates(hex, sprite)
+                g.drawImage(sprite.image, centeredCoordinates.first, centeredCoordinates.second, null)
+            }
 
         g.dispose()
         cachedImage.value = image
