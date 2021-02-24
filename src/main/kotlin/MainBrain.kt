@@ -22,7 +22,7 @@ class MainBrain {
     private val keyInputState = MutableStateFlow<Set<KeyboardInputAdapter.KeyState>>(setOf())
     private val keyListener = KeyboardInputAdapter(keyInputState)
 
-    private val hexMap = HexMap(width, height, 5, 5, 100)
+    private val hexMap = HexMap(width, height, 7, 7, 75)
 
     private val gameFrame = GameFrame("Let's try strategy and animations! 2021!", width, height, imageState)
 
