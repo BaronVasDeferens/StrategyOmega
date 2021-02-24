@@ -9,8 +9,6 @@ data class Hex(val row: Int, val col: Int) {
 
     lateinit var poly: Polygon
 
-    var selected: Boolean = false
-
     fun containsPoint(x: Int, y: Int): Boolean {
         return poly.contains(x, y) ?: false
     }
@@ -28,7 +26,7 @@ data class HexMap(
 ) {
 
     // Cached image: the last render of the map. Only updates when a change to the map occurs
-    val cachedImage = MutableStateFlow<BufferedImage>(BufferedImage(width,height, BufferedImage.TYPE_INT_RGB))
+    val cachedImage = MutableStateFlow<BufferedImage>(BufferedImage(width, height, BufferedImage.TYPE_INT_RGB))
 
     private val hexArray: Array<Array<Hex>> = Array(rows) { rowNum ->
         Array(columns) { colNum ->
@@ -128,11 +126,6 @@ data class HexMap(
         return hexArray[row][column]
     }
 
-    fun toggleHexSelection(hex: Hex) {
-        hex.selected = !hex.selected
-        renderHexMap()
-    }
-
     private fun findAdjacentHexesTo(center: Hex): Set<Hex> {
         val adjacentHexes = mutableSetOf<Hex>()
 
@@ -175,7 +168,9 @@ data class HexMap(
         return adjacentHexes
     }
 
-    fun findAllAdjacentHexesTo(center: Hex, depth: Int, adjacentSet: MutableSet<Hex>): Set<Hex> {
+    fun findAllAdjacentHexesTo(center: Hex?, depth: Int, adjacentSet: MutableSet<Hex> = mutableSetOf()): Set<Hex> {
+
+        if (center == null) return setOf()
 
         if (depth == 0) {
             return adjacentSet
@@ -203,20 +198,45 @@ data class HexMap(
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g.stroke = BasicStroke(5f)
-        hexArray.flatten().forEach {hex ->
-            when (hex.selected) {
-                true -> {
-                    g.color = Color.RED
-                    g.fillPolygon(hex.poly)
-                    g.color = Color.BLACK
-                    g.drawPolygon(hex.poly)
-                }
-                false -> {
-                    g.color = Color.BLACK
-                    g.drawPolygon(hex.poly)
-                }
+        hexArray.flatten().forEach { hex ->
+            g.color = Color.BLACK
+            g.drawPolygon(hex.poly)
+        }
+
+
+        getEntities()
+            .filterIsInstance<Sprite>()
+            .forEach { sprite ->
+            val hex = getHexForEntity(sprite)!!
+            val centeredCoordinates = findCenteredCoordinates(hex, sprite)
+            g.drawImage(sprite.image, centeredCoordinates.first, centeredCoordinates.second, null)
+        }
+
+        g.dispose()
+        cachedImage.value = image
+    }
+
+    fun renderGameState(gameState: GameState) {
+
+        val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        val g = image.graphics as Graphics2D
+        g.color = Color.WHITE
+        g.fillRect(0, 0, width, height)
+
+
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        g.stroke = BasicStroke(5f)
+        hexArray.flatten().forEach { hex ->
+            if (gameState.selectedHex == hex) {
+                g.color = Color.RED
+                g.fillPolygon(hex.poly)
+            } else if (gameState.highlightedHexes.contains(hex)) {
+                g.color = Color.PINK
+                g.fillPolygon(hex.poly)
             }
 
+            g.color = Color.BLACK
+            g.drawPolygon(hex.poly)
         }
 
 

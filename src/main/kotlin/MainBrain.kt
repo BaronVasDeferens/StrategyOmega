@@ -26,19 +26,21 @@ class MainBrain {
 
     private val gameFrame = GameFrame("Let's try strategy and animations! 2021!", width, height, imageState)
 
+    private val gameStateFlow = MutableStateFlow(GameState(HexMap(1, 1, 1, 1)))
 
     init {
 
         val isPaused = AtomicBoolean(false)
 
-        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 0,0)
-        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 1,0)
-        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 2,0)
+        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 0, 0)
+        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 1, 0)
+        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 2, 0)
 
-        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 0,4)
-        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 1,4)
-        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 2,4)
+        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 0, 4)
+        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 1, 4)
+        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 2, 4)
 
+        gameStateFlow.value = GameState(hexMap)
 
         gameFrame.setKeyListener(keyListener)
         gameFrame.setMouseAdapter(mouseClickAdapter)
@@ -47,12 +49,9 @@ class MainBrain {
         mouseClickChannel.onEach { click ->
             when (click.type) {
                 MouseClickType.MOUSE_CLICK_PRIMARY_DOWN -> {
-                    val hex = hexMap.getHexAtClick(click)
-                    val residentEntity = hexMap.getEntityAtClick(click)
-                    if (hex != null && residentEntity != null) {
-                        hexMap.toggleHexSelection(hex)
-                    }
-
+                    val state = gameStateFlow.value
+                    gameStateFlow.value = state.processClick(click)
+                    hexMap.renderGameState(gameStateFlow.value)
                 }
                 else -> {
 
