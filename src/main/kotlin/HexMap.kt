@@ -26,7 +26,7 @@ data class HexMap(
 ) {
 
     // Cached image: the last render of the map. Only updates when a change to the map occurs
-    val cachedImage = MutableStateFlow<BufferedImage>(BufferedImage(width, height, BufferedImage.TYPE_INT_RGB))
+    val cachedImage = MutableStateFlow(BufferedImage(width, height, BufferedImage.TYPE_INT_RGB))
 
     private val hexArray: Array<Array<Hex>> = Array(rows) { rowNum ->
         Array(columns) { colNum ->
@@ -58,21 +58,9 @@ data class HexMap(
     }
 
     fun assignEntityToHex(entity: Entity, hex: Hex) {
-        // Using the upper left corner as the start point, work out how to center the image in the hex
-//        entity.x = hex.poly!!.xpoints[0] + hexSize/2 - entity.image.width/2
-//        val heightOfHexHalf = (0.8660 * hexSize).toInt()
-//        entity.y = hex.poly!!.ypoints[0] + heightOfHexHalf - entity.image.width/2
         entityToHexMap[entity] = hex
         renderHexMap()
     }
-
-    fun addEntity(entity: Entity) {
-        looseEntities.add(entity)
-    }
-
-//    fun findEntityAt(click: MouseClick): Entity? {
-//        return entityToHexMap.keys.firstOrNull { it.containsPoint(click.x, click.y) && it.isClickable}
-//    }
 
     private fun setHexPolygons() {
 
@@ -115,10 +103,6 @@ data class HexMap(
                 beginDrawingFromY
 
         }
-    }
-
-    fun setHexSize(size: Int) {
-        hexSize = size
     }
 
     fun getHexAtClick(click: MouseClick): Hex? {
