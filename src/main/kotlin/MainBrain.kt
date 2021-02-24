@@ -48,8 +48,11 @@ class MainBrain {
             when (click.type) {
                 MouseClickType.MOUSE_CLICK_PRIMARY_DOWN -> {
                     val hex = hexMap.getHexAtClick(click)
-                    val entity = hexMap.getEntityAtClick(click)
-                    println("$hex $entity")
+                    val residentEntity = hexMap.getEntityAtClick(click)
+                    if (hex != null && residentEntity != null) {
+                        hexMap.toggleHexSelection(hex)
+                    }
+
                 }
                 else -> {
 

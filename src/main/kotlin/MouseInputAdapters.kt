@@ -31,8 +31,11 @@ val mouseClickAdapter = object : MouseInputAdapter() {
     override fun mousePressed(e: MouseEvent?) {
         super.mousePressed(e)
 
-
-        mouseClickChannel.value = MouseClick(MOUSE_CLICK_PRIMARY_DOWN, e!!.point)
+        e?.apply {
+            if (button == MouseEvent.BUTTON1) {
+                mouseClickChannel.value = MouseClick(MOUSE_CLICK_PRIMARY_DOWN, point)
+            }
+        }
     }
 
     override fun mouseReleased(e: MouseEvent?) {

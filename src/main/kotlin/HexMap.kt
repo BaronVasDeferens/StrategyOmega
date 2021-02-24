@@ -7,10 +7,12 @@ import java.awt.image.BufferedImage
 
 data class Hex(val row: Int, val col: Int) {
 
-    var poly: Polygon? = null
+    lateinit var poly: Polygon
+
+    var selected: Boolean = false
 
     fun containsPoint(x: Int, y: Int): Boolean {
-        return poly?.contains(x, y) ?: false
+        return poly.contains(x, y) ?: false
     }
 }
 
@@ -89,10 +91,8 @@ data class HexMap(
                 poly.addPoint(x + hexSize / 2, (.8660 * 2.0 * hexSize.toDouble() + y).toInt())
                 poly.addPoint(x, y + (.8660 * hexSize).toInt())
 
-                val hex = getHexAtRowCol(i, j)!!
-                if (hex.poly == null) {
-                    hex.poly = poly
-                }
+                getHexAtRowCol(i, j)!!.poly = poly
+
 
                 //Move the pencil over
                 x += (hexSize / 2) + hexSize
@@ -126,6 +126,11 @@ data class HexMap(
 
     private fun getHexAtRowCol(row: Int, column: Int): Hex? {
         return hexArray[row][column]
+    }
+
+    fun toggleHexSelection(hex: Hex) {
+        hex.selected = !hex.selected
+        renderHexMap()
     }
 
     private fun findAdjacentHexesTo(center: Hex): Set<Hex> {
@@ -196,6 +201,25 @@ data class HexMap(
         g.fillRect(0, 0, width, height)
 
 
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        g.stroke = BasicStroke(5f)
+        hexArray.flatten().forEach {hex ->
+            when (hex.selected) {
+                true -> {
+                    g.color = Color.RED
+                    g.fillPolygon(hex.poly)
+                    g.color = Color.BLACK
+                    g.drawPolygon(hex.poly)
+                }
+                false -> {
+                    g.color = Color.BLACK
+                    g.drawPolygon(hex.poly)
+                }
+            }
+
+        }
+
+
         getEntities()
             .filterIsInstance<Sprite>()
             .forEach { sprite ->
@@ -203,13 +227,6 @@ data class HexMap(
                 val centeredCoordinates = findCenteredCoordinates(hex, sprite)
                 g.drawImage(sprite.image, centeredCoordinates.first, centeredCoordinates.second, null)
             }
-
-        g.color = Color.BLACK
-        g.stroke = BasicStroke(5f)
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        hexArray.flatten().forEach {
-            g.drawPolygon(it.poly)
-        }
 
         g.dispose()
         cachedImage.value = image
