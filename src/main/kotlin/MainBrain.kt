@@ -51,7 +51,7 @@ class MainBrain {
                 MouseClickType.MOUSE_CLICK_PRIMARY_DOWN -> {
                     val state = gameStateFlow.value
                     gameStateFlow.value = state.processClick(click)
-                    hexMap.renderGameState(gameStateFlow.value)
+                    gameStateFlow.value.hexMap.renderGameState(gameStateFlow.value)
                 }
                 else -> {
 
@@ -73,7 +73,8 @@ class MainBrain {
     }
 
     private fun update() {
-
+        val state = gameStateFlow.value
+        gameStateFlow.value = state.update()
     }
 
     private fun render() {

@@ -1,3 +1,5 @@
+import java.awt.image.BufferedImage
+
 enum class GamePhase {
     PLAYER_MOVE,
     BLOCKING_ANIMATION,
@@ -7,8 +9,10 @@ enum class GamePhase {
 data class GameState(
     val hexMap: HexMap,
     val selectedHex: Hex? = null,
-    val highlightedHexes: Set<Hex> = setOf()
+    val highlightedHexes: Set<Hex> = setOf(),
+    val animations: List<MovementAnimation> = listOf()
 ) {
+
 
 
     fun processClick(click: MouseClick): GameState {
@@ -50,8 +54,9 @@ data class GameState(
                 } else {
                     // Clicked hex was highlighted, but contained no entity.
                     // TODO: perform move
-                    println("Move...")
-                    return this.copy(selectedHex = null, highlightedHexes = setOf())
+                    val entityInSelectedHex = hexMap.getEntityForHex(selectedHex) as Sprite
+                    println("Move: $entityInSelectedHex from $selectedHex to $hexAtClick")
+                    return this.copy(selectedHex = null, highlightedHexes = setOf(), animations = animations.plus(MovementAnimation(entityInSelectedHex, selectedHex, hexAtClick!!)))
                 }
             } else {
                 // Clicked hex was not highlighted. De-select/unhighlight everything
@@ -60,4 +65,32 @@ data class GameState(
             }
         }
     }
+
+    fun update(): GameState {
+        animations.forEach { it.updateAnimation() }
+        return this
+    }
+}
+
+data class MovementAnimation(val sprite: Sprite,
+                             val originHex: Hex,
+                             val destinationHex: Hex) {
+
+    // TODO: include some flag to indicate that this is finished so that it can be removed
+
+    private val x: Int = sprite.x
+    private val y: Int = sprite.y
+
+    fun updateAnimation() {
+
+    }
+
+    fun drawImage(): BufferedImage {
+        return sprite.image
+    }
+
+    fun onComplete() {
+
+    }
+
 }

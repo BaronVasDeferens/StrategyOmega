@@ -41,7 +41,7 @@ data class HexMap(
         renderHexMap()
     }
 
-    fun getHexForEntity(entity: Entity): Hex? {
+    fun getHexForEntity(entity: Entity?): Hex? {
         return entityToHexMap[entity]
     }
 
@@ -230,9 +230,9 @@ data class HexMap(
             g.drawPolygon(hex.poly)
         }
 
-
         getEntities()
             .filterIsInstance<Sprite>()
+            .filterNot { sprite -> gameState.animations.map { it.sprite }.any { it == sprite } }
             .forEach { sprite ->
                 val hex = getHexForEntity(sprite)!!
                 val centeredCoordinates = findCenteredCoordinates(hex, sprite)
