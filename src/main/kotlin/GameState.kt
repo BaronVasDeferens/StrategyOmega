@@ -2,7 +2,7 @@ import java.awt.image.BufferedImage
 
 enum class GamePhase {
     PLAYER_MOVE,
-    BLOCKING_ANIMATION,
+    ANIMATING,
     AI_MOVE
 }
 
@@ -14,12 +14,14 @@ data class GameState(
 ) {
 
 
-
     fun processClick(click: MouseClick): GameState {
+
+//        if (phase == GamePhase.ANIMATING || phase == GamePhase.AI_MOVE) {
+//            return this
+//        }
 
         val hexAtClick = hexMap.getHexAtClick(click)
         val residentEntity = hexMap.getEntityAtClick(click)
-
 
         if (selectedHex == null) {
             // No hex is selected.
@@ -28,7 +30,10 @@ data class GameState(
                 println("Entity chosen. Showing selection and highlighting neighbors...")
                 return this.copy(
                     selectedHex = hexAtClick,
-                    highlightedHexes = hexMap.findAllAdjacentHexesTo(hexAtClick, 1) // TODO depth depends on unit, unit type
+                    highlightedHexes = hexMap.findAllAdjacentHexesTo(
+                        hexAtClick,
+                        1
+                    ) // TODO depth depends on unit, unit type
                 )
             } else {
                 // No hex is selected. Hex clicked has no entity.
@@ -56,7 +61,18 @@ data class GameState(
                     // TODO: perform move
                     val entityInSelectedHex = hexMap.getEntityForHex(selectedHex) as Sprite
                     println("Move: $entityInSelectedHex from $selectedHex to $hexAtClick")
-                    return this.copy(selectedHex = null, highlightedHexes = setOf(), animations = animations.plus(MovementAnimation(entityInSelectedHex, selectedHex, hexAtClick!!)))
+                    return this.copy(
+                        selectedHex = null,
+                        highlightedHexes = setOf(),
+                        animations = animations.plus(
+                            MovementAnimation(
+                                entityInSelectedHex,
+                                selectedHex,
+                                hexAtClick!!,
+                            ) {
+                                hexMap.assignEntityToHex(entityInSelectedHex, hexAtClick)
+                            })
+                    )
                 }
             } else {
                 // Clicked hex was not highlighted. De-select/unhighlight everything
@@ -68,29 +84,39 @@ data class GameState(
 
     fun update(): GameState {
         animations.forEach { it.updateAnimation() }
-        return this
+        return this.copy(animations = animations.toMutableList().filterNot { it.isComplete })
     }
 }
 
-data class MovementAnimation(val sprite: Sprite,
-                             val originHex: Hex,
-                             val destinationHex: Hex) {
+data class MovementAnimation(
+    val sprite: Sprite,
+    val originHex: Hex,
+    val destinationHex: Hex,
+    val onCompleteFun: () -> Unit
+) {
 
     // TODO: include some flag to indicate that this is finished so that it can be removed
 
-    private val x: Int = sprite.x
-    private val y: Int = sprite.y
+    var x: Int = originHex.poly.xpoints[0]
+    var y: Int = originHex.poly.ypoints[0]
+
+    var isComplete: Boolean = false
+    var count = 0
+    var maxCount = 60
 
     fun updateAnimation() {
 
+        x += 1
+        y += 1
+
+        count++
+        if (count >= maxCount) {
+            isComplete = true
+            onCompleteFun()
+        }
     }
 
     fun drawImage(): BufferedImage {
         return sprite.image
     }
-
-    fun onComplete() {
-
-    }
-
 }

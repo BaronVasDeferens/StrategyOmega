@@ -46,6 +46,8 @@ class MainBrain {
         gameFrame.setMouseAdapter(mouseClickAdapter)
         gameFrame.showFrame()
 
+        gameStateFlow.value.update()
+
         mouseClickChannel.onEach { click ->
             when (click.type) {
                 MouseClickType.MOUSE_CLICK_PRIMARY_DOWN -> {
@@ -78,6 +80,7 @@ class MainBrain {
     }
 
     private fun render() {
+        gameStateFlow.value.hexMap.renderGameState(gameStateFlow.value)
         gameFrame.drawImage(hexMap.cachedImage.value)
     }
 }

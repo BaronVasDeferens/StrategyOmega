@@ -179,7 +179,7 @@ data class HexMap(
         return adjacentSet
     }
 
-    private fun renderHexMap() {
+    fun renderHexMap() {
 
         val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         val g = image.graphics as Graphics2D
@@ -238,6 +238,11 @@ data class HexMap(
                 val centeredCoordinates = findCenteredCoordinates(hex, sprite)
                 g.drawImage(sprite.image, centeredCoordinates.first, centeredCoordinates.second, null)
             }
+
+        gameState.animations.forEach { anim ->
+            println("anim ${anim.x} ${anim.y}")
+            g.drawImage(anim.drawImage(), anim.x, anim.y, null)
+        }
 
         g.dispose()
         cachedImage.value = image
