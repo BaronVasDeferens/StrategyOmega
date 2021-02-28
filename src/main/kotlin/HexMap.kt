@@ -8,6 +8,12 @@ import java.awt.image.BufferedImage
 data class Hex(val row: Int, val col: Int) {
 
     lateinit var poly: Polygon
+    var hexSize = 50
+
+    fun setPolyAndSize(poly: Polygon, hexSize: Int) {
+        this.poly = poly
+        this.hexSize = hexSize
+    }
 
     fun containsPoint(x: Int, y: Int): Boolean {
         return poly.contains(x, y) ?: false
@@ -85,7 +91,7 @@ data class HexMap(
                 poly.addPoint(x + hexSize / 2, (.8660 * 2.0 * hexSize.toDouble() + y).toInt())
                 poly.addPoint(x, y + (.8660 * hexSize).toInt())
 
-                getHexAtRowCol(i, j)!!.poly = poly
+                getHexAtRowCol(i, j)!!.setPolyAndSize(poly, hexSize)
 
 
                 //Move the pencil over
@@ -199,7 +205,7 @@ data class HexMap(
             .filterIsInstance<Sprite>()
             .forEach { sprite ->
                 val hex = getHexForEntity(sprite)!!
-                val centeredCoordinates = findCenteredCoordinates(hex, sprite)
+                val centeredCoordinates = findCenteredCoordinatesForSprite(hex, sprite)
                 g.drawImage(sprite.image, centeredCoordinates.first, centeredCoordinates.second, null)
             }
 
@@ -235,12 +241,11 @@ data class HexMap(
             .filterNot { sprite -> gameState.animations.map { it.sprite }.any { it == sprite } }
             .forEach { sprite ->
                 val hex = getHexForEntity(sprite)!!
-                val centeredCoordinates = findCenteredCoordinates(hex, sprite)
+                val centeredCoordinates = findCenteredCoordinatesForSprite(hex, sprite)
                 g.drawImage(sprite.image, centeredCoordinates.first, centeredCoordinates.second, null)
             }
 
         gameState.animations.forEach { anim ->
-            println("anim ${anim.x} ${anim.y}")
             g.drawImage(anim.drawImage(), anim.x, anim.y, null)
         }
 
@@ -248,17 +253,7 @@ data class HexMap(
         cachedImage.value = image
     }
 
-    /**
-     * Given a hex and an image, returns the points (x,y) where an image, when drawn at x,y, will be centered within the hex
-     * TODO: check whether image "fits" inside
-     */
-    private fun findCenteredCoordinates(hex: Hex, entity: Sprite): Pair<Int, Int> {
-        val centerX = hex.poly!!.xpoints[0] + hexSize / 2 - entity.image.width / 2
-        val heightOfHexHalf = (0.8660 * hexSize).toInt()
-        val centerY = hex.poly!!.ypoints[0] + heightOfHexHalf - entity.image.width / 2
 
-        return Pair(centerX, centerY)
-    }
 
     private fun getEntities(): List<Entity> {
         return entityToHexMap.keys.toList().plus(looseEntities)

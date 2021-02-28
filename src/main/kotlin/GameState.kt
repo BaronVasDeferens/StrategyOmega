@@ -1,4 +1,6 @@
 import java.awt.image.BufferedImage
+import kotlin.math.abs
+import kotlin.math.sqrt
 
 enum class GamePhase {
     PLAYER_MOVE,
@@ -10,7 +12,7 @@ data class GameState(
     val hexMap: HexMap,
     val selectedHex: Hex? = null,
     val highlightedHexes: Set<Hex> = setOf(),
-    val animations: List<MovementAnimation> = listOf()
+    val animations: List<AnimateHexToHexMove> = listOf()
 ) {
 
 
@@ -65,7 +67,7 @@ data class GameState(
                         selectedHex = null,
                         highlightedHexes = setOf(),
                         animations = animations.plus(
-                            MovementAnimation(
+                            AnimateHexToHexMove(
                                 entityInSelectedHex,
                                 selectedHex,
                                 hexAtClick!!,
@@ -88,26 +90,53 @@ data class GameState(
     }
 }
 
-data class MovementAnimation(
+
+data class AnimateHexToHexMove(
     val sprite: Sprite,
     val originHex: Hex,
     val destinationHex: Hex,
     val onCompleteFun: () -> Unit
 ) {
 
-    // TODO: include some flag to indicate that this is finished so that it can be removed
+    var x: Int = 0
+    var y: Int = 0
 
-    var x: Int = originHex.poly.xpoints[0]
-    var y: Int = originHex.poly.ypoints[0]
+    var deltaX: Int = 0
+    var deltaY: Int = 0
 
     var isComplete: Boolean = false
     var count = 0
     var maxCount = 60
 
+    // TODO: include some flag to indicate that this is finished so that it can be removed
+    init {
+        val centeredOrigin = findCenteredCoordinatesForSprite(originHex, sprite)
+        val centeredDestination = findCenteredCoordinatesForSprite(destinationHex, sprite)
+
+        val xDiff = (centeredOrigin.first - centeredDestination.first)
+        val yDiff = (centeredOrigin.second - centeredDestination.second)
+
+        println(">>> cenOrg: $centeredOrigin centDest: $centeredDestination")
+        println(">>> xDiff: $xDiff yDiff: $yDiff")
+
+        val hypotenuse = sqrt(abs(xDiff * xDiff).toDouble() + abs(yDiff * yDiff)) .toInt()
+        // maxCount = abs(hypotenuse)
+
+        deltaX = xDiff / maxCount * -1
+        deltaY = yDiff / maxCount * -1
+
+        x = centeredOrigin.first
+        y = centeredOrigin.second
+
+        println(">>> hypotenuse: $hypotenuse dx: $deltaX dy: $deltaY maxCount: $maxCount")
+    }
+
+
+
     fun updateAnimation() {
 
-        x += 1
-        y += 1
+        x += deltaX
+        y += deltaY
 
         count++
         if (count >= maxCount) {

@@ -1,10 +1,5 @@
-import java.awt.Color
-import java.awt.Graphics2D
 import java.awt.image.BufferedImage
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 import javax.imageio.ImageIO
-import kotlin.random.Random
 
 sealed class Entity(initialX: Int, initialY: Int) {
 

@@ -32,12 +32,12 @@ class MainBrain {
 
         val isPaused = AtomicBoolean(false)
 
-        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 0, 0)
-        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 1, 0)
+//        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 0, 0)
+//        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 1, 0)
         hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 2, 0)
 
-        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 0, 4)
-        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 1, 4)
+//        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 0, 4)
+//        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 1, 4)
         hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 2, 4)
 
         gameStateFlow.value = GameState(hexMap)
