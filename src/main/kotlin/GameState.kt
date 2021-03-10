@@ -16,14 +16,14 @@ data class GameState(
 ) {
 
 
-    fun processClick(click: MouseClick): GameState {
+    fun processClick(actionEvent: MouseActionEvent): GameState {
 
 //        if (phase == GamePhase.ANIMATING || phase == GamePhase.AI_MOVE) {
 //            return this
 //        }
 
-        val hexAtClick = hexMap.getHexAtClick(click)
-        val residentEntity = hexMap.getEntityAtClick(click)
+        val hexAtClick = hexMap.getHexAtClick(actionEvent)
+        val residentEntity = hexMap.getEntityAtClick(actionEvent)
 
         if (selectedHex == null) {
             // No hex is selected.

@@ -111,12 +111,12 @@ data class HexMap(
         }
     }
 
-    fun getHexAtClick(click: MouseClick): Hex? {
-        return hexArray.flatten().firstOrNull { it.containsPoint(click.x, click.y) }
+    fun getHexAtClick(actionEvent: MouseActionEvent): Hex? {
+        return hexArray.flatten().firstOrNull { it.containsPoint(actionEvent.x, actionEvent.y) }
     }
 
-    fun getEntityAtClick(click: MouseClick): Entity? {
-        val hex = getHexAtClick(click) ?: return null
+    fun getEntityAtClick(actionEvent: MouseActionEvent): Entity? {
+        val hex = getHexAtClick(actionEvent) ?: return null
         return entityToHexMap.entries.firstOrNull { it.value == hex }?.key
     }
 

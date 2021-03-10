@@ -43,18 +43,19 @@ class MainBrain {
         gameStateFlow.value = GameState(hexMap)
 
         gameFrame.setKeyListener(keyListener)
-        gameFrame.setMouseAdapter(mouseClickAdapter)
+        gameFrame.setMouseAdapter(mouseActionAdapter)
         gameFrame.showFrame()
 
         gameStateFlow.value.update()
 
-        mouseClickChannel.onEach { click ->
+        mouseActionFlow.onEach { click ->
             when (click.type) {
                 MouseClickType.MOUSE_CLICK_PRIMARY_DOWN -> {
                     val state = gameStateFlow.value
                     gameStateFlow.value = state.processClick(click)
                     gameStateFlow.value.hexMap.renderGameState(gameStateFlow.value)
                 }
+
                 else -> {
 
                 }
