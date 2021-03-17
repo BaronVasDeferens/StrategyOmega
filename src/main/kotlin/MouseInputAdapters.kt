@@ -9,15 +9,23 @@ enum class MouseClickType {
     MOUSE_MOVE,
     MOUSE_CLICK_PRIMARY_DOWN,
     MOUSE_CLICK_PRIMARY_UP,
-    MOUSE_CLICK_PRIMARY_DRAG
+    MOUSE_CLICK_PRIMARY_DRAG,
+    MOUSE_CLICK_SECONDARY_DOWN,
+    MOUSE_CLICK_SECONDARY_UP
 }
 
-data class MouseActionEvent(val type: MouseClickType, val point: Point, val timeStamp: Long = System.currentTimeMillis()) {
+data class MouseActionEvent(
+    val type: MouseClickType,
+    val point: Point,
+    val timeStamp: Long = System.currentTimeMillis()
+) {
     val x = point.x
     val y = point.y
 
     override fun equals(other: Any?): Boolean {
-        return if (other !is MouseActionEvent) { false } else {
+        return if (other !is MouseActionEvent) {
+            false
+        } else {
             type == other.type && x == other.x && y == other.y && timeStamp == other.timeStamp
         }
     }
@@ -32,15 +40,29 @@ val mouseActionAdapter = object : MouseInputAdapter() {
         super.mousePressed(e)
 
         e?.apply {
-            if (button == MouseEvent.BUTTON1) {
-                mouseActionFlow.value = MouseActionEvent(MOUSE_CLICK_PRIMARY_DOWN, point)
+            when (button) {
+                MouseEvent.BUTTON1 -> {
+                    mouseActionFlow.value = MouseActionEvent(MOUSE_CLICK_PRIMARY_DOWN, point)
+                }
+                MouseEvent.BUTTON3 -> {
+                    mouseActionFlow.value = MouseActionEvent(MOUSE_CLICK_SECONDARY_DOWN, point)
+                }
             }
         }
     }
 
     override fun mouseReleased(e: MouseEvent?) {
         super.mouseReleased(e)
-        mouseActionFlow.value = MouseActionEvent(MOUSE_CLICK_PRIMARY_UP, e!!.point)
+        e?.apply {
+            when (button) {
+                MouseEvent.BUTTON1 -> {
+                    mouseActionFlow.value = MouseActionEvent(MOUSE_CLICK_PRIMARY_UP, point)
+                }
+                MouseEvent.BUTTON3 -> {
+                    mouseActionFlow.value = MouseActionEvent(MOUSE_CLICK_SECONDARY_UP, point)
+                }
+            }
+        }
     }
 
     override fun mouseMoved(e: MouseEvent?) {

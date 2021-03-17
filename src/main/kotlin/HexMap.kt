@@ -28,7 +28,7 @@ data class HexMap(
     private val height: Int,
     private val rows: Int,
     private val columns: Int,
-    private var hexSize: Int = 50
+    var hexSize: Int = 50
 ) {
 
     // Cached image: the last render of the map. Only updates when a change to the map occurs
@@ -247,6 +247,13 @@ data class HexMap(
 
         gameState.animations.forEach { anim ->
             g.drawImage(anim.drawImage(), anim.x, anim.y, null)
+        }
+
+        // draw any transient lines
+        for (list in gameState.transientLines.windowed(2)) {
+            g.color = Color.GREEN
+            g.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f)
+            g.drawLine(list[0].first, list[0].second, list[1].first, list[1].second)
         }
 
         g.dispose()

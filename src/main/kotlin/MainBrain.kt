@@ -49,10 +49,22 @@ class MainBrain {
         gameStateFlow.value.update()
 
         mouseActionFlow.onEach { click ->
+
+            val state = gameStateFlow.value
+
             when (click.type) {
                 MouseClickType.MOUSE_CLICK_PRIMARY_DOWN -> {
-                    val state = gameStateFlow.value
-                    gameStateFlow.value = state.processClick(click)
+                    gameStateFlow.value = state.processPrimaryClick(click)
+                    gameStateFlow.value.hexMap.renderGameState(gameStateFlow.value)
+                }
+
+                MouseClickType.MOUSE_CLICK_SECONDARY_DOWN -> {
+                    gameStateFlow.value = state.processSecondaryClick(click)
+                    gameStateFlow.value.hexMap.renderGameState(gameStateFlow.value)
+                }
+
+                MouseClickType.MOUSE_CLICK_SECONDARY_UP -> {
+                    gameStateFlow.value = state.clearSecondaryAction()
                     gameStateFlow.value.hexMap.renderGameState(gameStateFlow.value)
                 }
 

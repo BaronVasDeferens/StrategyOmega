@@ -12,11 +12,12 @@ data class GameState(
     val hexMap: HexMap,
     val selectedHex: Hex? = null,
     val highlightedHexes: Set<Hex> = setOf(),
-    val animations: List<AnimateHexToHexMove> = listOf()
+    val animations: List<AnimateHexToHexMove> = listOf(),
+    val transientLines: List<Pair<Int,Int>> = listOf()
 ) {
 
 
-    fun processClick(actionEvent: MouseActionEvent): GameState {
+    fun processPrimaryClick(actionEvent: MouseActionEvent): GameState {
 
 //        if (phase == GamePhase.ANIMATING || phase == GamePhase.AI_MOVE) {
 //            return this
@@ -87,6 +88,30 @@ data class GameState(
     fun update(): GameState {
         animations.forEach { it.updateAnimation() }
         return this.copy(animations = animations.toMutableList().filterNot { it.isComplete })
+    }
+
+    fun processSecondaryClick(click: MouseActionEvent): GameState {
+        return when(selectedHex) {
+            null -> {
+                println("Secondary click cleared!")
+                this
+            } else -> {
+
+                println("Secondary click triggered...")
+
+                val selHexCenterX = selectedHex.poly.xpoints[0] + (0.5f * hexMap.hexSize).toInt()
+                val selHexCenterY = selectedHex.poly.ypoints[0] + (0.8660f * hexMap.hexSize).toInt()
+                val targetHex = hexMap.getHexAtClick(click)!!
+                val targetHexCenterX = targetHex.poly.xpoints[0] + (0.5f * hexMap.hexSize).toInt()
+                val targetHexCenterY = targetHex.poly.ypoints[0] + (0.8660f * hexMap.hexSize).toInt()
+                this.copy(transientLines = listOf(Pair(selHexCenterX, selHexCenterY),
+                        Pair(targetHexCenterX, targetHexCenterY)))
+            }
+        }
+    }
+
+    fun clearSecondaryAction(): GameState {
+        return this.copy(transientLines = listOf())
     }
 }
 
