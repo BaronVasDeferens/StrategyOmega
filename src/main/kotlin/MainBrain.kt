@@ -22,7 +22,7 @@ class MainBrain {
     private val keyInputState = MutableStateFlow<Set<KeyboardInputAdapter.KeyState>>(setOf())
     private val keyListener = KeyboardInputAdapter(keyInputState)
 
-    private val hexMap = HexMap(width, height, 7, 7, 75)
+    private val hexMap = HexMap(width, height, 11, 12, 50)
 
     private val gameFrame = GameFrame("Let's try strategy and animations! 2021!", width, height, imageState)
 
@@ -32,13 +32,17 @@ class MainBrain {
 
         val isPaused = AtomicBoolean(false)
 
+
+        hexMap.generateRegions(5)
+
+
 //        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 0, 0)
 //        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 1, 0)
-        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 2, 0)
+//        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 2, 0)
 
 //        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 0, 4)
 //        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 1, 4)
-        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 2, 4)
+//        hexMap.assignEntityToHex(Sprite(imageFileName = "crab_2.png"), 2, 4)
 
         gameStateFlow.value = GameState(hexMap)
 
@@ -64,6 +68,7 @@ class MainBrain {
                 }
 
                 MouseClickType.MOUSE_CLICK_SECONDARY_UP -> {
+                    hexMap.generateRegions(5)
                     gameStateFlow.value = state.clearSecondaryAction()
                     gameStateFlow.value.hexMap.renderGameState(gameStateFlow.value)
                 }

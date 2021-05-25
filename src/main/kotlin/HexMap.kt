@@ -3,12 +3,14 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.awt.*
 import java.awt.image.BufferedImage
+import kotlin.random.Random
 
 
 data class Hex(val row: Int, val col: Int) {
 
     lateinit var poly: Polygon
     var hexSize = 50
+    var color: Color? = null
 
     fun setPolyAndSize(poly: Polygon, hexSize: Int) {
         this.poly = poly
@@ -45,6 +47,72 @@ data class HexMap(
     init {
         setHexPolygons()
         renderHexMap()
+    }
+
+    fun generateRegions(regions: Int = 1) {
+
+        hexArray.flatten().forEach { it.color = null }
+
+
+        val seeds = hexArray.flatten().shuffled().take(regions)
+
+        // generate a color for each seed
+        val seedColors = seeds.associateWith { hex ->
+            Color(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255))
+        }
+
+
+        val frontier = mutableSetOf<Hex>()
+
+        seeds.forEach { seed ->
+            seed.color = seedColors[seed]
+            frontier.add(seed)
+        }
+
+        var index = 0
+        while (frontier.isNotEmpty()) {
+            // cycle through the colors; helps improve "fairness"
+            val candidate = frontier.filter { it.color == seeds[index].color }.shuffled().firstOrNull()
+            index = (index + 1) % seeds.size
+            if (candidate == null) {
+                continue
+            }
+
+            // Are we dealing with a seed?
+            // The candidate is a seed.
+            if (seeds.contains(candidate)) {
+                findAdjacentHexesTo(candidate).filter { it.color == null }
+                    .shuffled()
+                    .firstOrNull()
+                    ?.apply {
+                        this.color = candidate.color
+                        frontier.remove(this)
+
+                        findAdjacentHexesTo(this)
+                            .filter { it.color == null }
+                            .forEach {
+                                it.color = candidate.color
+                                frontier.add(it)
+                            }
+                    }
+
+            } else {
+                val newCandidate = findAdjacentHexesTo(candidate).filter { it.color == null }
+                    .shuffled()
+                    .firstOrNull()
+
+                if (newCandidate != null) {
+                    newCandidate.color = candidate.color
+                    frontier.remove(newCandidate)
+                    findAdjacentHexesTo(newCandidate).filter { it.color == null }.forEach {
+                        it.color = candidate.color
+                        frontier.add(it)
+                    }
+                }
+            }
+
+            frontier.remove(candidate)
+        }
     }
 
     fun getHexForEntity(entity: Entity?): Hex? {
@@ -196,6 +264,11 @@ data class HexMap(
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g.stroke = BasicStroke(5f)
         hexArray.flatten().forEach { hex ->
+
+            hex.color?.apply {
+                g.color = this
+                g.fillPolygon(hex.poly)
+            }
             g.color = Color.BLACK
             g.drawPolygon(hex.poly)
         }
@@ -232,6 +305,11 @@ data class HexMap(
                 g.fillPolygon(hex.poly)
             }
 
+            hex.color?.apply {
+                g.color = this
+                g.fillPolygon(hex.poly)
+            }
+
             g.color = Color.BLACK
             g.drawPolygon(hex.poly)
         }
@@ -259,7 +337,6 @@ data class HexMap(
         g.dispose()
         cachedImage.value = image
     }
-
 
 
     private fun getEntities(): List<Entity> {
