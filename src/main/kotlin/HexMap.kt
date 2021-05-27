@@ -33,6 +33,8 @@ data class HexMap(
     var hexSize: Int = 50
 ) {
 
+    private var stroke = BasicStroke(1.0f)
+
     // Cached image: the last render of the map. Only updates when a change to the map occurs
     val cachedImage = MutableStateFlow(BufferedImage(width, height, BufferedImage.TYPE_INT_RGB))
 
@@ -51,9 +53,10 @@ data class HexMap(
 
     fun generateRegions(regions: Int = 1) {
 
+        // Reset
         hexArray.flatten().forEach { it.color = null }
 
-
+        // Find the "seed" (first) of a region
         val seeds = hexArray.flatten().shuffled().take(regions)
 
         // generate a color for each seed
@@ -61,7 +64,7 @@ data class HexMap(
             Color(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255))
         }
 
-
+        // The frontier is the list of potential additions to the map
         val frontier = mutableSetOf<Hex>()
 
         seeds.forEach { seed ->
@@ -262,7 +265,7 @@ data class HexMap(
 
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        g.stroke = BasicStroke(5f)
+        g.stroke = stroke
         hexArray.flatten().forEach { hex ->
 
             hex.color?.apply {
@@ -295,7 +298,7 @@ data class HexMap(
 
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        g.stroke = BasicStroke(5f)
+        g.stroke = stroke
         hexArray.flatten().forEach { hex ->
             if (gameState.selectedHex == hex) {
                 g.color = Color.RED
