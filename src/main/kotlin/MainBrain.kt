@@ -33,7 +33,7 @@ class MainBrain {
         val isPaused = AtomicBoolean(false)
 
 
-        hexMap.generateRegions(5)
+        hexMap.generateRegions(7)
 
 
 //        hexMap.assignEntityToHex(Sprite(imageFileName = "soldier_1.png"), 0, 0)
@@ -68,7 +68,7 @@ class MainBrain {
                 }
 
                 MouseClickType.MOUSE_CLICK_SECONDARY_UP -> {
-                    hexMap.generateRegions(5)
+                    hexMap.generateRegions(7)
                     gameStateFlow.value = state.clearSecondaryAction()
                     gameStateFlow.value.hexMap.renderGameState(gameStateFlow.value)
                 }

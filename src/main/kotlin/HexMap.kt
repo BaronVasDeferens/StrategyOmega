@@ -313,6 +313,11 @@ data class HexMap(
                 g.fillPolygon(hex.poly)
             }
 
+            gameState.selectedHexes.forEach { hex ->
+                g.color = Color.BLACK
+                g.fillPolygon(hex.poly)
+            }
+
             g.color = Color.BLACK
             g.drawPolygon(hex.poly)
         }
