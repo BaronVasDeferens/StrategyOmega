@@ -17,7 +17,6 @@ data class GameState(
     val transientLines: List<Pair<Int,Int>> = listOf()
 ) {
 
-
     fun processPrimaryClick(actionEvent: MouseActionEvent): GameState {
 
 //        if (phase == GamePhase.ANIMATING || phase == GamePhase.AI_MOVE) {

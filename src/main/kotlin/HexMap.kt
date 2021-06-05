@@ -48,7 +48,6 @@ data class HexMap(
 
     init {
         setHexPolygons()
-        renderHexMap()
     }
 
     fun generateRegions(regions: Int = 1) {
@@ -116,6 +115,47 @@ data class HexMap(
 
             frontier.remove(candidate)
         }
+    }
+
+    @Synchronized
+    fun generateTunnel(tunnelHexSize: Int = 65): Set<Hex> {
+        val tunnelHexes = mutableSetOf<Hex>()
+
+        val startHex = hexArray.flatten().random()
+        tunnelHexes.add(startHex)
+
+        var failures = 0
+
+        while (tunnelHexes.size < tunnelHexSize) {
+
+            val candidate = tunnelHexes.shuffled().first()
+
+            // Rank each hex: if it has few neighbors in the tunnel, it has a lower score (more desireable)
+            val newHex = findAdjacentHexesTo(candidate).sortedBy {
+                findAdjacentHexesTo(it).sumBy {
+                    // Rank each hex: if it has few neighbors in the tunnel, it has a lower score (more desireable)
+                    when (tunnelHexes.contains(it)) {
+                        true -> 1
+                        else -> 0
+                    }
+                }
+
+            }.firstOrNull()
+
+            if (newHex != null) {
+                tunnelHexes.add(newHex)
+            } else {
+                failures++
+            }
+
+            if (failures >= 1000) {
+                println(">>> TOO MANY FAILURES!")
+                failures = 0;
+                tunnelHexes.clear()
+            }
+        }
+
+        return tunnelHexes.toSet()
     }
 
     fun getHexForEntity(entity: Entity?): Hex? {
@@ -313,13 +353,13 @@ data class HexMap(
                 g.fillPolygon(hex.poly)
             }
 
-            gameState.selectedHexes.forEach { hex ->
-                g.color = Color.BLACK
-                g.fillPolygon(hex.poly)
-            }
-
             g.color = Color.BLACK
             g.drawPolygon(hex.poly)
+        }
+
+        gameState.selectedHexes.forEach { hex ->
+            g.color = Color.BLACK
+            g.fillPolygon(hex.poly)
         }
 
         getEntities()
